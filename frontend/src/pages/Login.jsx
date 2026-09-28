@@ -2,12 +2,15 @@ import { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate, Link } from 'react-router-dom';
 import { login, reset } from '../redux/authSlice';
+import { Eye, EyeOff } from 'lucide-react'; 
 
 const Login = () => {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
   });
+  
+  const [showPassword, setShowPassword] = useState(false);
 
   const { email, password } = formData;
   const navigate = useNavigate();
@@ -16,20 +19,28 @@ const Login = () => {
   const { user, isLoading, isError, message } = useSelector((state) => state.auth);
 
   useEffect(() => {
-    if (isError) {
-      console.error(message);
-    }
     if (user) {
       navigate('/');
     }
-    dispatch(reset());
-  }, [user, isError, message, navigate, dispatch]);
+  }, [user, navigate]);
+
+
+  useEffect(() => {
+    return () => {
+      dispatch(reset());
+    };
+  }, [dispatch]);
 
   const onChange = (e) => {
     setFormData((prevState) => ({
       ...prevState,
       [e.target.name]: e.target.value,
     }));
+    
+
+    if (isError) {
+      dispatch(reset());
+    }
   };
 
   const onSubmit = (e) => {
@@ -45,7 +56,7 @@ const Login = () => {
 
       {isError && (
         <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-600 text-sm rounded-md">
-          {message}
+          {message || "Invalid credentials"}
         </div>
       )}
 
@@ -64,15 +75,28 @@ const Login = () => {
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
-          <input
-            type="password"
-            name="password"
-            value={password}
-            onChange={onChange}
-            required
-            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-gray-900"
-            placeholder="••••••••"
-          />
+          <div className="relative">
+            <input
+              type={showPassword ? "text" : "password"}
+              name="password"
+              value={password}
+              onChange={onChange}
+              required
+              className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-gray-900 pr-10"
+              placeholder="••••••••"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 focus:outline-none"
+            >
+              {showPassword ? (
+                <EyeOff className="w-4 h-4" />
+              ) : (
+                <Eye className="w-4 h-4" />
+              )}
+            </button>
+          </div>
         </div>
         <button
           type="submit"

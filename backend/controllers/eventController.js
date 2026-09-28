@@ -42,7 +42,7 @@ const createEvent = async (req, res) => {
 
 const getEvents = async (req, res) => {
   try {
-    const { search, status, timing } = req.query;
+    const { search, status, timing, capacity } = req.query;
     let query = {};
 
     if (search) {
@@ -54,6 +54,7 @@ const getEvents = async (req, res) => {
     }
 
     const now = new Date();
+
     if (timing === "upcoming") {
       query.date = { $gte: now };
     } else if (timing === "past") {
@@ -73,11 +74,12 @@ const getEvents = async (req, res) => {
     });
 
     let filteredEvents = formattedEvents;
-    if (timing === "available") {
+
+    if (capacity === "available") {
       filteredEvents = formattedEvents.filter(
         (e) => e.availableSeats > 0 && !e.hasStarted,
       );
-    } else if (timing === "full") {
+    } else if (capacity === "full") {
       filteredEvents = formattedEvents.filter((e) => e.availableSeats <= 0);
     }
 
@@ -147,14 +149,12 @@ const updateEvent = async (req, res) => {
 
 const deleteEvent = async (req, res) => {
   try {
-    // Permanently remove the event from MongoDB
     const event = await Event.findByIdAndDelete(req.params.id);
 
     if (!event) {
       return res.status(404).json({ message: "Event not found" });
     }
 
-    // Clean up all associated registration documents
     await Registration.deleteMany({ event: req.params.id });
 
     return res.status(200).json({

@@ -14,8 +14,17 @@ const Home = () => {
 
   const fetchEvents = async () => {
     try {
+      let apiTiming = "";
+      let apiCapacity = "";
+
+      if (timing === "upcoming" || timing === "past") {
+        apiTiming = timing;
+      } else if (timing === "available" || timing === "full") {
+        apiCapacity = timing;
+      }
+
       const response = await API.get("/events", {
-        params: { search, timing },
+        params: { search, timing: apiTiming, capacity: apiCapacity },
       });
       const eventData = response.data.events || response.data;
       setEvents(Array.isArray(eventData) ? eventData : []);
@@ -62,7 +71,7 @@ const Home = () => {
           Upcoming Events
         </h1>
 
-        {/* Search Bar */}
+
         <div className="w-full md:w-72">
           <input
             type="text"
@@ -74,7 +83,7 @@ const Home = () => {
         </div>
       </div>
 
-      {/* Filter Tabs */}
+
       <div className="flex flex-wrap gap-2 mb-6 text-sm">
         <button
           onClick={() => setTiming("")}

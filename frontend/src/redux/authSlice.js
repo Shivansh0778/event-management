@@ -12,6 +12,16 @@ const initialState = {
   message: "",
 };
 
+const extractErrorMessage = (error) => {
+  return (
+    error.response?.data?.message ||
+    error.response?.data?.error ||
+    (typeof error.response?.data === "string" ? error.response.data : null) ||
+    error.message ||
+    "Invalid credentials"
+  );
+};
+
 export const login = createAsyncThunk(
   "auth/login",
   async (userData, thunkAPI) => {
@@ -19,11 +29,15 @@ export const login = createAsyncThunk(
       const response = await API.post("/auth/login", userData);
       if (response.data) {
         localStorage.setItem("token", response.data.token);
-        localStorage.setItem("user", JSON.stringify(response.data));
+
+        localStorage.setItem(
+          "user",
+          JSON.stringify(response.data.user || response.data),
+        );
       }
       return response.data;
     } catch (error) {
-      const message = error.response?.data?.message || error.message;
+      const message = extractErrorMessage(error);
       return thunkAPI.rejectWithValue(message);
     }
   },
@@ -36,11 +50,14 @@ export const register = createAsyncThunk(
       const response = await API.post("/auth/register", userData);
       if (response.data) {
         localStorage.setItem("token", response.data.token);
-        localStorage.setItem("user", JSON.stringify(response.data));
+        localStorage.setItem(
+          "user",
+          JSON.stringify(response.data.user || response.data),
+        );
       }
       return response.data;
     } catch (error) {
-      const message = error.response?.data?.message || error.message;
+      const message = extractErrorMessage(error);
       return thunkAPI.rejectWithValue(message);
     }
   },
@@ -74,6 +91,7 @@ export const authSlice = createSlice({
       .addCase(login.rejected, (state, action) => {
         state.isLoading = false;
         state.isError = true;
+
         state.message = action.payload;
         state.user = null;
         state.token = null;
