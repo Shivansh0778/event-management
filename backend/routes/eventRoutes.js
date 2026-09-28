@@ -15,19 +15,20 @@ const { protect, adminOnly } = require("../middleware/auth");
 
 const router = express.Router();
 
-router.route("/").get(getEvents).post(protect, adminOnly, createEvent);
+router.get("/", getEvents);
 
-router
-  .route("/:id")
-  .get(getEventById)
-  .put(protect, adminOnly, updateEvent)
-  .delete(protect, adminOnly, deleteEvent);
+router.get("/:id", getEventById);
+
+router.post("/", protect, adminOnly, createEvent);
+
+router.put("/:id", protect, adminOnly, updateEvent);
+
+router.delete("/:id", protect, adminOnly, deleteEvent);
 
 router.get("/:id/registrations", protect, adminOnly, getEventRegistrations);
 
-router
-  .route("/:id/register")
-  .post(protect, registerForEvent)
-  .delete(protect, cancelRegistration);
+router.post("/:id/register", protect, registerForEvent);
+
+router.delete("/:id/register", protect, cancelRegistration);
 
 module.exports = router;

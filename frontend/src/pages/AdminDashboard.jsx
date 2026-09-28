@@ -14,6 +14,15 @@ const AdminDashboard = () => {
   });
   const [message, setMessage] = useState("");
 
+  const [editingEventId, setEditingEventId] = useState(null);
+  const [editFormData, setEditFormData] = useState({
+    title: "",
+    description: "",
+    date: "",
+    location: "",
+    totalSeats: 30,
+  });
+
   const { title, description, date, location, totalSeats } = formData;
 
   const fetchAdminEvents = async () => {
@@ -56,6 +65,10 @@ const AdminDashboard = () => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
+  const onEditChange = (e) => {
+    setEditFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  };
+
   const onSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -71,6 +84,29 @@ const AdminDashboard = () => {
       fetchAdminEvents();
     } catch (error) {
       setMessage(error.response?.data?.message || "Failed to create event");
+    }
+  };
+
+  const handleEditClick = (ev) => {
+    setEditingEventId(ev._id);
+    setEditFormData({
+      title: ev.title || "",
+      description: ev.description || "",
+      date: ev.date ? ev.date.slice(0, 16) : "", 
+      location: ev.location || "",
+      totalSeats: ev.totalSeats || 30,
+    });
+  };
+
+  const onUpdateSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await API.put(`/events/${editingEventId}`, editFormData);
+      setMessage("Event updated successfully!");
+      setEditingEventId(null);
+      fetchAdminEvents();
+    } catch (error) {
+      setMessage(error.response?.data?.message || "Failed to update event");
     }
   };
 
@@ -220,12 +256,20 @@ const AdminDashboard = () => {
                     ({ev.availableSeats}/{ev.totalSeats} seats)
                   </span>
                 </div>
-                <button
-                  onClick={() => handleDeleteEvent(ev._id)}
-                  className="px-3 py-1 bg-red-50 text-red-600 border border-red-200 rounded-md text-xs font-medium hover:bg-red-100 transition"
-                >
-                  Delete
-                </button>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => handleEditClick(ev)}
+                    className="px-3 py-1 border border-gray-300 rounded-md text-xs font-medium text-gray-700 hover:bg-gray-50 transition"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDeleteEvent(ev._id)}
+                    className="px-3 py-1 bg-red-50 text-red-600 border border-red-200 rounded-md text-xs font-medium hover:bg-red-100 transition"
+                  >
+                    Delete
+                  </button>
+                </div>
               </li>
             ))}
           </ul>
@@ -286,6 +330,104 @@ const AdminDashboard = () => {
           )}
         </div>
       </div>
+
+      {editingEventId && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg max-w-md w-full p-6 border border-gray-200 shadow-sm">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              Edit Event
+            </h3>
+
+            <form onSubmit={onUpdateSubmit} className="space-y-4">
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">
+                  Title
+                </label>
+                <input
+                  type="text"
+                  name="title"
+                  value={editFormData.title}
+                  onChange={onEditChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-gray-900"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">
+                  Description
+                </label>
+                <textarea
+                  name="description"
+                  value={editFormData.description}
+                  onChange={onEditChange}
+                  rows="3"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-gray-900"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">
+                  Date & Time
+                </label>
+                <input
+                  type="datetime-local"
+                  name="date"
+                  value={editFormData.date}
+                  onChange={onEditChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-gray-900"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">
+                  Location
+                </label>
+                <input
+                  type="text"
+                  name="location"
+                  value={editFormData.location}
+                  onChange={onEditChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-gray-900"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">
+                  Total Seats
+                </label>
+                <input
+                  type="number"
+                  name="totalSeats"
+                  value={editFormData.totalSeats}
+                  onChange={onEditChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-gray-900"
+                  required
+                />
+              </div>
+
+              <div className="flex gap-2 pt-2">
+                <button
+                  type="submit"
+                  className="flex-1 py-2 bg-gray-900 text-white rounded-md text-sm font-medium hover:bg-gray-800 transition"
+                >
+                  Save Changes
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setEditingEventId(null)}
+                  className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 transition"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

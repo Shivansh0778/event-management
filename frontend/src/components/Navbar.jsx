@@ -32,7 +32,7 @@ const Navbar = () => {
                 to="/admin"
                 className="text-gray-600 hover:text-gray-900 text-sm font-medium"
               >
-                Admin Dashboard
+                Dashboard
               </Link>
             )}
             <span className="text-sm font-medium text-gray-900">
