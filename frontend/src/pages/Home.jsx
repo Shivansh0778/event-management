@@ -71,7 +71,6 @@ const Home = () => {
           Upcoming Events
         </h1>
 
-
         <div className="w-full md:w-72">
           <input
             type="text"
@@ -82,7 +81,6 @@ const Home = () => {
           />
         </div>
       </div>
-
 
       <div className="flex flex-wrap gap-2 mb-6 text-sm">
         <button
